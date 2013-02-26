@@ -52,8 +52,9 @@ namespace GitCommandsTest
                                  "Commit hash:\t" + data.Guid + Environment.NewLine +
                                  "Parent(s):\t<a href='gitex://gotocommit/" + data.ParentGuids[0] + "'>" + data.ParentGuids[0].Substring(0, 10) + "</a>";
 
-            // TODO: Check notes
-            var expectedBody = "\n\n" + WebUtility.HtmlEncode(data.Body.Trim()) + "\n\n";
+            var expectedBody = "\n\nAdd correct reference to NetSpell.SpellChecker.dll\n\n" +
+                "Signed-off-by: Henk Westhuis &lt;Henk_Westhuis@hotmail.com&gt;\n" + Environment.NewLine +
+                "Notes:" + Environment.NewLine + "\tTest git notes\n\n";
 
             var commitInformation = CommitInformation.GetCommitInfo(data);
 
