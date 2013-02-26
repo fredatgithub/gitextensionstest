@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+using System.Net;
+using NUnit.Framework;
 using TestInitialize = NUnit.Framework.SetUpAttribute;
 using TestContext = System.Object;
 using TestProperty = NUnit.Framework.PropertyAttribute;
@@ -15,44 +17,45 @@ namespace GitCommandsTest
     [TestClass]
     public class CommitInformationTest
     {
+        private static string GetCurrentDir()
+        {
+            string path = typeof(CommitInformationTest).Assembly.CodeBase.Replace("file:///", "");
+            path = Path.GetDirectoryName(path);
+
+            return GitModule.FindGitWorkingDir(path);
+        }
+
+        private GitModule _module;
+
+        [TestInitialize()]
+        public void Initialize()
+        {
+            _module = new GitModule(GetCurrentDir());
+            _module = _module.SuperprojectModule;
+        }
 
         [TestMethod]
         public void CanCreateCommitInformationFromFormatedData()
         {
-            var commitGuid = Guid.NewGuid();
-            var treeGuid = Guid.NewGuid();
-            var parentGuid1 = Guid.NewGuid().ToString();
-            var parentGuid2 = Guid.NewGuid().ToString();
-            var authorTime = DateTime.UtcNow.AddDays(-3);
-            var commitTime = DateTime.UtcNow.AddDays(-2);
-            var authorUnixTime = (int)(authorTime - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
-            var commitUnixTime = (int)(commitTime - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            string error = "";
+            CommitData data = CommitData.GetCommitData(_module, "5003a05de05307b83b0c8a81ab282613231b1a9f", ref error);
+            Assert.IsNotNull(data);
+            Assert.AreNotEqual(data.AuthorDate, data.CommitDate);
+            DateTime currentDate = DateTime.UtcNow;
+            DateTime authorDate = data.AuthorDate.LocalDateTime;
+            DateTime commitDate = data.CommitDate.LocalDateTime;
 
-            var rawData = commitGuid + "\n" +
-                          treeGuid + "\n" +
-                          parentGuid1 + " " + parentGuid2 + "\n" +
-                          "John Doe (Acme Inc) <John.Doe@test.com>\n" +
-                          authorUnixTime + "\n" +
-                          "Jane Doe (Acme Inc) <Jane.Doe@test.com>\n" +
-                          commitUnixTime + "\n" +
-                          "\n" +
-                          "\tI made a really neato change.\n\n" +
-                          "Notes (p4notes):\n" +
-                          "\tP4@547123";
+            var expectedHeader = "Author:\t\t<a href='mailto:getit@xs4all.nl'>Wilbert van Dolleweerd &lt;getit@xs4all.nl&gt;</a>" + Environment.NewLine +
+                                 "Author date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, authorDate) + " (" + authorDate.ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
+                                 "Committer:\t<a href='mailto:Henk_Westhuis@hotmail.com'>Henk Westhuis &lt;Henk_Westhuis@hotmail.com&gt;</a>" + Environment.NewLine +
+                                 "Commit date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, commitDate) + " (" + commitDate.ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
+                                 "Commit hash:\t" + data.Guid + Environment.NewLine +
+                                 "Parent(s):\t<a href='gitex://gotocommit/" + data.ParentGuids[0] + "'>" + data.ParentGuids[0].Substring(0, 10) + "</a>";
 
-            var expectedHeader = "Author:\t\t<a href='mailto:John.Doe@test.com'>John Doe (Acme Inc) &lt;John.Doe@test.com&gt;</a>" + Environment.NewLine +
-                                 "Author date:\t3 days ago (" + authorTime.ToLocalTime().ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
-                                 "Committer:\t<a href='mailto:Jane.Doe@test.com'>Jane Doe (Acme Inc) &lt;Jane.Doe@test.com&gt;</a>" + Environment.NewLine +
-                                 "Commit date:\t2 days ago (" + commitTime.ToLocalTime().ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
-                                 "Commit hash:\t" + commitGuid + Environment.NewLine +
-                                 "Parent(s):\t<a href='gitex://gotocommit/" + parentGuid1 + "'>" + parentGuid1.Substring(0, 10) + "</a> <a href='gitex://gotocommit/" + parentGuid2 + "'>" + parentGuid2.Substring(0, 10) + "</a>";
+            // TODO: Check notes
+            var expectedBody = "\n\n" + WebUtility.HtmlEncode(data.Body.Trim()) + "\n\n";
 
-            var expectedBody = "\n\nI made a really neato change." + Environment.NewLine + Environment.NewLine +
-                               "Notes (p4notes):" + Environment.NewLine +
-                               "\tP4@547123\n\n";
-
-            var commitData = CommitData.CreateFromFormatedData(rawData, new GitModule(""));
-            var commitInformation = CommitInformation.GetCommitInfo(commitData);
+            var commitInformation = CommitInformation.GetCommitInfo(data);
 
             Assert.AreEqual(expectedHeader, commitInformation.Header);
             Assert.AreEqual(expectedBody, commitInformation.Body);
@@ -68,14 +71,14 @@ namespace GitCommandsTest
         [TestMethod]
         public void GetCommitInfoTestWhenDataIsNull()
         {
-            var actualResult = CommitInformation.GetCommitInfo(new GitModule(""), "fakesha1");
+            var actualResult = CommitInformation.GetCommitInfo(_module, "fakesha1");
             Assert.AreEqual("Cannot find commit fakesha1", actualResult.Header);
         }
 
         [TestMethod]
         public void GetAllBranchesWhichContainGivenCommitTestReturnsEmptyList()
         {
-            var module = new GitModule("");
+            var module = _module;
             var actualResult = module.GetAllBranchesWhichContainGivenCommit("fakesha1", false, false);
 
             Assert.IsNotNull(actualResult);
