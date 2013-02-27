@@ -34,7 +34,7 @@ namespace GitCommandsTest
             _module = _module.SuperprojectModule;
         }
 
-        [TestMethod]
+        [TestMethod, Category("libgit2sharp")]
         public void CanCreateCommitInformationFromFormatedData()
         {
             string error = "";
@@ -69,14 +69,14 @@ namespace GitCommandsTest
             CommitInformation.GetCommitInfo(data: null);
         }
 
-        [TestMethod]
+        [TestMethod, Category("libgit2sharp")]
         public void GetCommitInfoTestWhenDataIsNull()
         {
             var actualResult = CommitInformation.GetCommitInfo(_module, "fakesha1");
             Assert.AreEqual("Cannot find commit fakesha1", actualResult.Header);
         }
 
-        [TestMethod]
+        [TestMethod, Category("libgit2sharp")]
         public void GetAllBranchesWhichContainGivenCommitTestReturnsEmptyList()
         {
             var module = _module;
