@@ -46,9 +46,9 @@ namespace GitCommandsTest
             DateTime commitDate = data.CommitDate.LocalDateTime;
 
             var expectedHeader = "Author:\t\t<a href='mailto:getit@xs4all.nl'>Wilbert van Dolleweerd &lt;getit@xs4all.nl&gt;</a>" + Environment.NewLine +
-                                 "Author date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, authorDate) + " (" + authorDate.ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
+                                 "Author date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, authorDate) + " (" + GitCommandHelpers.GetFullDateString(data.AuthorDate) + ")" + Environment.NewLine +
                                  "Committer:\t<a href='mailto:Henk_Westhuis@hotmail.com'>Henk Westhuis &lt;Henk_Westhuis@hotmail.com&gt;</a>" + Environment.NewLine +
-                                 "Commit date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, commitDate) + " (" + commitDate.ToString("ddd MMM dd HH':'mm':'ss yyyy") + ")" + Environment.NewLine +
+                                 "Commit date:\t" + GitCommandHelpers.GetRelativeDateString(currentDate, commitDate) + " (" + GitCommandHelpers.GetFullDateString(data.CommitDate) + ")" + Environment.NewLine +
                                  "Commit hash:\t" + data.Guid + Environment.NewLine +
                                  "Parent(s):\t<a href='gitex://gotocommit/" + data.ParentGuids[0] + "'>" + data.ParentGuids[0].Substring(0, 10) + "</a>";
 
