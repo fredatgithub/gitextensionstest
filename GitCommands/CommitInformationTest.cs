@@ -12,7 +12,7 @@ using System;
 using System.Linq;
 using GitCommands;
 
-namespace GitCommandsTest
+namespace GitExtensionsTest
 {
     [TestClass]
     public class CommitInformationTest
