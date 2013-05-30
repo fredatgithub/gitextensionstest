@@ -1,16 +1,11 @@
-﻿using System.IO;
-using System.Net;
-using NUnit.Framework;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestContext = System.Object;
-using TestProperty = NUnit.Framework.PropertyAttribute;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
-
-using System;
+﻿using System;
+using System.IO;
 using System.Linq;
 using GitCommands;
+using NUnit.Framework;
+using TestInitialize = NUnit.Framework.SetUpAttribute;
+using TestClass = NUnit.Framework.TestFixtureAttribute;
+using TestMethod = NUnit.Framework.TestAttribute;
 
 namespace GitExtensionsTest
 {
@@ -52,11 +47,11 @@ namespace GitExtensionsTest
                                  "Commit hash:\t" + data.Guid + Environment.NewLine +
                                  "Parent(s):\t<a href='gitex://gotocommit/" + data.ParentGuids[0] + "'>" + data.ParentGuids[0].Substring(0, 10) + "</a>";
 
-            var expectedBody = "\n\nAdd correct reference to NetSpell.SpellChecker.dll\n\n" +
+            var expectedBody = "\nAdd correct reference to NetSpell.SpellChecker.dll\n\n" +
                 "Signed-off-by: Henk Westhuis &lt;Henk_Westhuis@hotmail.com&gt;\n" + Environment.NewLine +
-                "Notes:" + Environment.NewLine + "\tTest git notes\n\n";
+                "Notes:" + Environment.NewLine + "\tTest git notes";
 
-            var commitInformation = CommitInformation.GetCommitInfo(data);
+            var commitInformation = CommitInformation.GetCommitInfo(data, true);
 
             Assert.AreEqual(expectedHeader, commitInformation.Header);
             Assert.AreEqual(expectedBody, commitInformation.Body);
@@ -66,7 +61,7 @@ namespace GitExtensionsTest
         [ExpectedException(typeof(ArgumentNullException))]
         public void CanCreateCommitInformationFromFormatedDataThrowsException()
         {
-            CommitInformation.GetCommitInfo(data: null);
+            CommitInformation.GetCommitInfo(null, true);
         }
 
         [TestMethod, Category("libgit2sharp")]
