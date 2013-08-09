@@ -13,7 +13,7 @@ namespace GitExtensionsTest.Git
         [TestMethod]
         public void CanGetRelativeDateString()
         {
-            Settings.CurrentTranslation = "English";
+            AppSettings.CurrentTranslation = "English";
             DateTime now = DateTime.Now;
             Assert.AreEqual("0 seconds ago", GitCommandHelpers.GetRelativeDateString(now, now));
             Assert.AreEqual("1 second ago", GitCommandHelpers.GetRelativeDateString(now, now.AddSeconds(-1)));
@@ -38,7 +38,7 @@ namespace GitExtensionsTest.Git
         [TestMethod]
         public void CanGetRelativeNegativeDateString()
         {
-            Settings.CurrentTranslation = "English";
+            AppSettings.CurrentTranslation = "English";
             DateTime now = DateTime.Now;
             Assert.AreEqual("-1 second ago", GitCommandHelpers.GetRelativeDateString(now, now.AddSeconds(1)));
             Assert.AreEqual("-1 minute ago", GitCommandHelpers.GetRelativeDateString(now, now.AddMinutes(1)));
